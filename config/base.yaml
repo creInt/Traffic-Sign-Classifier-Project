@@ -1,0 +1,13 @@
+DATA:
+  ROOT: C:\Users\patri\Documents\Python\Self_Driving_Car_Engineer\CarND-Traffic-Sign-Classifier-Project\traffic-signs-data
+  REL_PATH: ""
+  BATCH_SIZE: 512
+MODEL:
+  NUM_CLASSES: 43
+
+OPTIM:
+  LR: 0.001
+  EPOCHS: 100
+
+EXP:
+  OUTPUT_PATH: ""
