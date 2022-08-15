@@ -8,6 +8,9 @@ class SimpleCNN(nn.Module):
         super().__init__()
         n_outs = cfg.NUM_CLASSES
         self.use_batch_norm = cfg.USE_BATCHN
+        self.use_dropout = cfg.USE_Dropout
+        if self.use_dropout:
+            self.dropout = nn.Dropout(cfg.DROPOUT)
         self.f1 = nn.Conv2d(3, 5, 3)
         self.f1_n = nn.BatchNorm2d(5)
         self.pool = nn.MaxPool2d(2)
@@ -27,13 +30,21 @@ class SimpleCNN(nn.Module):
         out = self.f1_n(out)
         if self.use_batch_norm:
             out = F.relu(self.f2(out))
+        if self.use_dropout:
+            out = self.dropout(out)
         out = self.pool(out)
         if self.use_batch_norm:
             out = self.f2_n(out)
+        if self.use_dropout:
+            out = self.dropout(out)
         out = F.relu(self.f3(out))
+        if self.use_dropout:
+            out = self.dropout(out)
         out_f = out.flatten(1)
         out = self.f4(out_f)
         out = F.relu(out)
+        if self.use_dropout:
+            out = self.dropout(out)
         out = self.f5(out)
         if self.sigm:
             out = self.sigm(out)

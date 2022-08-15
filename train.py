@@ -72,7 +72,7 @@ def train(args):
     # Loss
     criterion = nn.CrossEntropyLoss()
     # Optimizer
-    optimizer = optim.AdamW(model.parameters(), lr=cfg.OPTIM.LR, weight_decay=0.001)
+    optimizer = optim.AdamW(model.parameters(), lr=cfg.OPTIM.LR, weight_decay=cfg.OPTIM.WEIGHT_DECAY)
     # Loop epoch
     epochs = cfg.OPTIM.EPOCHS
     it = 0
