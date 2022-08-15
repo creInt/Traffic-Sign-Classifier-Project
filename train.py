@@ -15,6 +15,7 @@ from Model.resNetLearning import ResNet18
 from torchvision import models
 import pickle
 from Dataset.traffic_light_dataset import TrafficSignDataset
+import pandas
 
 
 def train(args):
@@ -27,6 +28,7 @@ def train(args):
     exp_dir, model_dir, tb_dir = utils.make_exp_Folder(tb_dir_flag=True)
     cfg.freeze()
     utils.save_yaml(exp_dir, cfg)
+    print(f"Running training with config\n{cfg}")
     # Load Dataset
     train_data = TrafficSignDataset(cfg, split="train")
     val_data = TrafficSignDataset(cfg, split="val")
@@ -43,6 +45,10 @@ def train(args):
         test_data, batch_size=cfg.DATA.BATCH_SIZE, shuffle=True, num_workers=1
     )
 
+    # Class names
+    names_path = cfg.DATA.CLASS_NAMES
+    data = pandas.read_csv(names_path, index_col=0)
+    class_names = data.iloc[:].SignName.values
    # Define model
    # Model
     if args.Device.isdigit():
@@ -69,8 +75,8 @@ def train(args):
     it = 0
     # tensorboard
     writer = SummaryWriter(comment=tb_dir)
-    #example_images = iter(train_loader).next()["image"].to(device)
-    #writer.add_graph(model, example_images)
+    example_images = iter(train_loader).next()[0].to(device)
+    writer.add_graph(model, example_images)
     best_vall_acc = 0
     verbose = args.verbose
     for e in range(epochs):
@@ -123,10 +129,11 @@ def train(args):
                 f"{np.mean(train_acc):.3f}"
                 f"\n Validation loss: {np.mean(valLoss):.3f}, Validation accuracy: {np.mean(valAcc):.3f}"
             )
-        if args.ValFigPlot and e % 10 == 0 and 0:  # TODO
+        if args.ValFigPlot and e % 10 == 0:
             sample = next(iter(val_loader))
+            y_true = sample[1]
             sample[1] = model.predict(sample[0].to(device))
-            fig, _ = make_grid(sample, class_names)
+            fig, _ = make_grid(sample, class_names, keys=[0, 1, 2], y_true=y_true)
             fig.savefig(os.path.join(exp_dir, f"Validation_Batch_Episode_{e}.png"))
 
     torch.save(model.state_dict(), os.path.join(model_dir, "last_model.pth"))
