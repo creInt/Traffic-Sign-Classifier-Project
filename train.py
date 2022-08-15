@@ -72,7 +72,7 @@ def train(args):
     # Loss
     criterion = nn.CrossEntropyLoss()
     # Optimizer
-    optimizer = optim.Adam(model.parameters(), lr=cfg.OPTIM.LR)
+    optimizer = optim.AdamW(model.parameters(), lr=cfg.OPTIM.LR, weight_decay=0.001)
     # Loop epoch
     epochs = cfg.OPTIM.EPOCHS
     it = 0
@@ -110,7 +110,7 @@ def train(args):
 
         valLoss = []
         valAcc = []
-        model = model.eval()
+        model.eval()
         for i, sample in enumerate(val_loader):
             with torch.no_grad():
                 y_hat = model(sample[0].to(device))
