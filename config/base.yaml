@@ -5,6 +5,7 @@ DATA:
   CLASS_NAMES: signnames.csv
 MODEL:
   NUM_CLASSES: 43
+  USE_BATCHN: True
 
 OPTIM:
   LR: 0.001

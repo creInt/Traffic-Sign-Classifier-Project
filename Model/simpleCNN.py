@@ -7,15 +7,15 @@ class SimpleCNN(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         n_outs = cfg.NUM_CLASSES
+        self.use_batch_norm = cfg.USE_BATCHN
         self.f1 = nn.Conv2d(3, 5, 3)
+        self.f1_n = nn.BatchNorm2d(5)
         self.pool = nn.MaxPool2d(2)
         self.f2 = nn.Conv2d(5, 5, 3)
+        self.f2_n = nn.BatchNorm2d(5)
         self.f3 = nn.Conv2d(5, 10, 3)
-        self.f4 = nn.Conv2d(10, 20, 3)
-        self.f5 = nn.Conv2d(20, 20, 3)
-        self.f6 = nn.Conv2d(20, 25, 3)
-        self.f6 = nn.Linear(160, 250)
-        self.f7 = nn.Linear(250, n_outs)
+        self.f4 = nn.Linear(160, 250)
+        self.f5 = nn.Linear(250, n_outs)
         if n_outs == 1:
             self.sigm = nn.Sigmoid()
         else:
@@ -24,20 +24,17 @@ class SimpleCNN(nn.Module):
     def forward(self, x):
         out = F.relu(self.f1(x))
         out = self.pool(out)
-        out = F.relu(self.f2(out))
+        out = self.f1_n(out)
+        if self.use_batch_norm:
+            out = F.relu(self.f2(out))
         out = self.pool(out)
+        if self.use_batch_norm:
+            out = self.f2_n(out)
         out = F.relu(self.f3(out))
-        """
-        out = self.pool(out)
-        out = F.relu(self.f4(out))
-        out = self.pool(out)
-        out = F.relu(self.f5(out))
-        out = self.pool(out)
-        """
         out_f = out.flatten(1)
-        out = self.f6(out_f)
+        out = self.f4(out_f)
         out = F.relu(out)
-        out = self.f7(out)
+        out = self.f5(out)
         if self.sigm:
             out = self.sigm(out)
 
