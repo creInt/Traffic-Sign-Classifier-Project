@@ -3,6 +3,7 @@ import torch
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 from Model.simpleCNN import SimpleCNN
+from Model.largeCNN import LargeCNN
 # from Dataset.cat_dog_dataset import CatDogDataset
 import argparse
 from utils.utils import load_config, get_git_hash
@@ -63,6 +64,8 @@ def train(args):
         model = SimpleCNN(cfg.MODEL)
     elif args.Model.lower() == "ResNet".lower():
         model = ResNet18(cfg.MODEL)
+    elif args.Model.lower() == "LargeCNN".lower():
+        model = LargeCNN(cfg.MODEL)
     model.to(device)
     if args.resume:
         model.load_state_dict(torch.load(args.resume))
@@ -151,7 +154,7 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", type=bool, default=True)
     parser.add_argument("--resume", default=False, help="Directory to continue training")
     parser.add_argument("--ValFigPlot", default=True)
-    parser.add_argument("--Model", default="SimpleCnn", help="Sets Model", choices=["SimpleCnn", "ResNet"])
+    parser.add_argument("--Model", default="SimpleCnn", help="Sets Model", choices=["SimpleCnn", "ResNet", "LargeCNN"])
     parser.add_argument("--Device", default="0", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
     parser.add_argument(
         "OPTS",
