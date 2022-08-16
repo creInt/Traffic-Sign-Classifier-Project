@@ -31,9 +31,9 @@ def train(args):
     utils.save_yaml(exp_dir, cfg)
     print(f"Running training with config\n{cfg}")
     # Load Dataset
-    train_data = TrafficSignDataset(cfg, split="train")
-    val_data = TrafficSignDataset(cfg, split="val")
-    test_data = TrafficSignDataset(cfg, split="test")
+    train_data = TrafficSignDataset(cfg.DATA, split="train")
+    val_data = TrafficSignDataset(cfg.DATA, split="val")
+    test_data = TrafficSignDataset(cfg.DATA, split="test")
 
     # Train Loader
     train_loader = torch.utils.data.DataLoader(
