@@ -11,7 +11,7 @@ class ResNet18(nn.Module):
         self.model = models.resnet18(pretrained=True)
         self.sigm = False
         for param in self.model.parameters():
-            param.requires_grad = False
+            param.requires_grad = True
         if cfg.NUM_CLASSES > 1:
             self.model.fc = nn.Linear(self.model.fc.in_features, cfg.NUM_CLASSES)
         elif cfg.NUM_CLASSES == 1:
