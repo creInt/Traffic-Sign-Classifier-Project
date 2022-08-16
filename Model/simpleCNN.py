@@ -8,7 +8,7 @@ class SimpleCNN(nn.Module):
         super().__init__()
         n_outs = cfg.NUM_CLASSES
         self.use_batch_norm = cfg.USE_BATCHN
-        self.use_dropout = cfg.USE_Dropout
+        self.use_dropout = cfg.USE_DROPOUT
         if self.use_dropout:
             self.dropout = nn.Dropout(cfg.DROPOUT)
         self.f1 = nn.Conv2d(3, 5, 3)
