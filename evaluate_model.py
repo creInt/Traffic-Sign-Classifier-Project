@@ -16,6 +16,7 @@ from torchvision import models
 import pickle
 import matplotlib.pyplot as plt
 from Dataset.traffic_light_dataset import TrafficSignDataset
+import pandas
 
 
 def train(args):
@@ -41,41 +42,18 @@ def train(args):
     elif args.Model.lower() == "ResNet".lower():
         model = ResNet18(cfg.MODEL)
     model.to(device)
-    if "experiments\\exp4\\model\\best_model.pth":  # args.resume: # TODO
-        model.load_state_dict(torch.load("experiments\\exp4\\model\\best_model.pth"))
+    model.load_state_dict(torch.load(args.resume))
 
     # Load Dataset
-    test_data = TrafficSignDataset(cfg, split="test")
+    test_data = TrafficSignDataset(cfg.DATA, split="test")
     test_loader = torch.utils.data.DataLoader(
         test_data, batch_size=cfg.DATA.BATCH_SIZE, shuffle=True, num_workers=1
     )
-    old = False
-    if old:
-        training_file = ".\\traffic-signs-data\\train.p"
-        validation_file = ".\\traffic-signs-data\\valid.p"
-        testing_file = ".\\traffic-signs-data\\test.p"
-        with open(training_file, mode='rb') as f:
-            train = pickle.load(f)
-        with open(validation_file, mode='rb') as f:
-            valid = pickle.load(f)
-        with open(testing_file, mode='rb') as f:
-            test = pickle.load(f)
-
-        X_train, y_train = train['features'], train['labels']
-        X_valid, y_valid = valid['features'], valid['labels']
-        X_test, y_test = test['features'], test['labels']
-        img = X_test[0]
-        X_train = np.moveaxis(X_train, -1, 1)
-        X_valid = np.moveaxis(X_valid, -1, 1)
-        X_test = np.moveaxis(X_test, -1, 1)
-        train_data = TensorDataset(torch.Tensor(X_train), torch.Tensor(y_train))
-        val_data = TensorDataset(torch.Tensor(X_valid), torch.Tensor(y_valid))
-        test_data = TensorDataset(torch.Tensor(X_test), torch.Tensor(y_test))
-
-    test_loader = torch.utils.data.DataLoader(
-        test_data, batch_size=cfg.DATA.BATCH_SIZE, shuffle=True, num_workers=8
-    )
-
+    # Class names
+    names_path = cfg.DATA.CLASS_NAMES
+    data = pandas.read_csv(names_path, index_col=0)
+    class_names = data.iloc[:].SignName.values
+    # Run Test
     for i, sample in enumerate(test_loader):
         with torch.no_grad():
             y_hat = model(sample[0].to(device))
@@ -83,16 +61,17 @@ def train(args):
         acc = torch.sum(
             y_pred == sample[1].type(torch.long).to(device)
         ) / y_pred.size(dim=0)
-    print(acc)
+    print(f"Accuracy on test set: {acc.detach().item()}")
 
     if args.ValFigPlot == 0 or 1:
         sample = next(iter(test_loader))
+        y_true = sample[1]
         sample[1] = model.predict(sample[0].to(device))
-        fig, _ = make_grid(sample, np.arange(0, 42), keys=[0, 1])
-
-        # fig.savefig(os.path.join(exp_dir, f"Validation_Batch_Episode_{e}.png")) # TODO
-
-    #torch.save(model.state_dict(), os.path.join(model_dir, "last_model.pth"))
+        fig, _ = make_grid(sample, class_names, keys=[0, 1, 2], y_true=y_true)
+        if args.verbose:
+            plt.show()
+        if args.save_fig is not None:
+            fig.savefig(os.path.join(args.save_fig, f"test_image.png"))
 
 
 if __name__ == "__main__":
@@ -106,6 +85,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--verbose", type=bool, default=True)
     parser.add_argument("--resume", default=False, help="Directory to continue training")
+    parser.add_argument("--save_fig", default=None, help="Directory to continue training")
     parser.add_argument("--ValFigPlot", default=True)
     parser.add_argument("--Model", default="SimpleCNN", help="Sets Model", choices=["SimpleCnn", "ResNet"])
     parser.add_argument("--Device", default="0", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
