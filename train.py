@@ -50,6 +50,7 @@ def train(args):
     names_path = cfg.DATA.CLASS_NAMES
     data = pandas.read_csv(names_path, index_col=0)
     class_names = data.iloc[:].SignName.values
+
    # Define model
    # Model
     if args.Device.isdigit():
