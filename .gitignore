@@ -6,3 +6,4 @@ runs/
 .vscode
 traffic-signs-data/
 *p
+test.py
