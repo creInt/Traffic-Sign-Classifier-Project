@@ -4,3 +4,4 @@ __pycache__
 experiments/
 runs/
 .vscode
+traffic-signs-data/
